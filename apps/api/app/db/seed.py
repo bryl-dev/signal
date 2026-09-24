@@ -9,6 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import SessionLocal
+from app.db.sources_seed import seed_sources
 from app.models.topic import Topic
 
 # Stable UUIDs so fixtures and frontend snapshots can pin IDs if needed.
@@ -67,8 +68,9 @@ async def seed_topics(session: AsyncSession) -> int:
 
 async def main() -> None:
     async with SessionLocal() as session:
-        count = await seed_topics(session)
-        print(f"Seeded {count} new topics.")
+        topics = await seed_topics(session)
+        sources = await seed_sources(session)
+        print(f"Seeded {topics} new topics, {sources} new sources.")
 
 
 if __name__ == "__main__":

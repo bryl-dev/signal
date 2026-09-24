@@ -24,7 +24,13 @@ export default function LoginPage() {
         mode === "login" ? await api.login(email, password) : await api.register(email, password);
       router.push(user.onboarded ? "/" : "/onboarding");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Something went wrong.");
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else if (err instanceof TypeError) {
+        setError("Can't reach the API. Is it running on port 8000, and is Postgres up?");
+      } else {
+        setError(err instanceof Error ? err.message : "Something went wrong.");
+      }
     } finally {
       setPending(false);
     }
