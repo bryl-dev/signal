@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Signal Fixture Feed</title>
+    <link>https://feeds.example.com/ai</link>
+    <item>
+      <title>New paper on RAG agents</title>
+      <link>https://example.com/posts/rag-agents?utm_source=rss&amp;utm_medium=feed</link>
+      <description>A &lt;b&gt;short&lt;/b&gt; summary of a retrieval-augmented agent paper.</description>
+      <author>ada@example.com</author>
+      <pubDate>Wed, 23 Sep 2026 12:00:00 GMT</pubDate>
+      <guid>https://example.com/posts/rag-agents</guid>
+    </item>
+    <item>
+      <title>Duplicate URL with trailing slash</title>
+      <link>https://www.example.com/posts/rag-agents/</link>
+      <description>Same story, different href shape.</description>
+      <pubDate>Wed, 23 Sep 2026 12:05:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

@@ -11,7 +11,8 @@ from app.core.logging import configure_logging
 from app.db.base import Base
 from app.db.seed import seed_topics
 from app.db.session import SessionLocal, engine
-from app.models import Topic, User, UserInterest  # noqa: F401
+from app.db.sources_seed import seed_sources
+from app.models import Document, IngestionRun, Source, Topic, User, UserInterest  # noqa: F401
 
 configure_logging()
 logger = structlog.get_logger()
@@ -27,6 +28,9 @@ async def lifespan(_app: FastAPI):
             created = await seed_topics(session)
             if created:
                 logger.info("topics_seeded", count=created)
+            sources = await seed_sources(session)
+            if sources:
+                logger.info("sources_seeded", count=sources)
     except Exception:
         # Fresh test databases create tables after app init; seed is best-effort.
         logger.warning("topic_seed_skipped", exc_info=True)

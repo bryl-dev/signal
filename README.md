@@ -2,13 +2,15 @@
 
 A personal information intelligence platform: ingest what you already care about, cluster duplicates, rank against your interest profile, and brief you with cited summaries.
 
-This repository is a **modular monolith** (FastAPI + Next.js + PostgreSQL + Redis). Week 1 is accounts, a curated interest taxonomy, and onboarding. The feed pipeline starts in week 2.
+This repository is a **modular monolith** (FastAPI + Next.js + PostgreSQL + Redis). Week 2 adds multi-source ingest into a shared document schema.
 
 ## What works now
 
 - Register / sign in with httpOnly JWT cookies
-- Pick at least 5 interests from AI, Gaming, and Anime / Manga
-- Health checks, Alembic migrations, topic seed, GitHub Actions CI
+- Pick at least 5 interests, including custom topics
+- Ingest RSS, YouTube channel RSS, and Hacker News into `documents`
+- Fetch latest from the home page (raw items, no ranking yet)
+- Health checks, Alembic migrations, topic/source seed, GitHub Actions CI
 
 ## Quick start (local)
 
@@ -26,6 +28,7 @@ pip install -e ".[dev]"
 # Postgres (Compose running):
 alembic upgrade head
 python -m app.db.seed
+# optional: python -m app.ingest.run
 uvicorn app.main:app --reload --port 8000
 
 # Or SQLite, no Docker:
@@ -63,10 +66,10 @@ API tests use an in-memory SQLite database and do not require Docker.
 ## Repository layout
 
 ```
-apps/api     FastAPI, Alembic, ARQ worker stub
+apps/api     FastAPI, Alembic, ingest adapters, ARQ worker
 apps/web     Next.js App Router
 evals/       Golden sets (later)
-fixtures/    Recorded feeds for ingest tests (later)
+fixtures/    Recorded RSS feeds for ingest tests
 ```
 
 ## What this is not (yet)

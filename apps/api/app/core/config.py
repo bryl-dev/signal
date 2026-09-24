@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     login_rate_window_seconds: int = 60
 
     min_interests: int = 5
+    ingest_tls_verify: bool = True
 
     @property
     def cors_origin_list(self) -> list[str]:

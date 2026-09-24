@@ -10,7 +10,7 @@ from app.db.base import Base
 from app.db.seed import seed_topics
 from app.db.session import get_db
 from app.main import app
-from app.models import Topic, User, UserInterest  # noqa: F401
+from app.models import Document, IngestionRun, Source, Topic, User, UserInterest  # noqa: F401
 
 
 @pytest.fixture
