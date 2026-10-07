@@ -35,6 +35,15 @@ class Settings(BaseSettings):
     min_interests: int = 5
     ingest_tls_verify: bool = True
 
+    # "fastembed" (local ONNX model) or "hashing" (offline, test-only quality).
+    embedding_provider: str = "fastembed"
+    embedding_model: str = "BAAI/bge-small-en-v1.5"
+    embedding_dim: int = 384
+    # Tuned with `python -m app.clustering.eval`; re-run it when the model or pair set changes.
+    cluster_similarity_threshold: float = 0.86
+    cluster_window_hours: int = 72
+    dedup_min_content_chars: int = 200
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

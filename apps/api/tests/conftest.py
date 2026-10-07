@@ -1,16 +1,19 @@
+import os
 from collections.abc import AsyncGenerator
+
+os.environ["EMBEDDING_PROVIDER"] = "hashing"
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
+from app import models  # noqa: F401
 from app.api.v1.auth import _limiter
 from app.db.base import Base
 from app.db.seed import seed_topics
 from app.db.session import get_db
 from app.main import app
-from app.models import Document, IngestionRun, Source, Topic, User, UserInterest  # noqa: F401
 
 
 @pytest.fixture

@@ -14,3 +14,9 @@ def test_same_story_same_hash() -> None:
 
 def test_strip_html() -> None:
     assert strip_html("A <b>short</b> summary") == "A short summary"
+
+
+def test_strip_html_decodes_entities() -> None:
+    assert strip_html("I&#x27;d read https:&#x2F;&#x2F;docs.example.com") == (
+        "I'd read https://docs.example.com"
+    )
