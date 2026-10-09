@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.clustering.service import process_new_documents
 from app.core.deps import get_current_user
 from app.db.session import get_db
 from app.ingest.pipeline import ingest_all
@@ -51,4 +52,5 @@ async def run_ingest(
     db: AsyncSession = Depends(get_db),
 ) -> IngestResponse:
     summary = await ingest_all(db)
+    summary.update(await process_new_documents(db))
     return IngestResponse(**summary)

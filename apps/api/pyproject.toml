@@ -24,6 +24,10 @@ dependencies = [
     "structlog>=24.4.0",
     "aiosqlite>=0.20.0",
     "feedparser>=6.0.11",
+    "numpy>=1.26",
+    "pgvector>=0.3.6",
+    "fastembed>=0.4",
+    "truststore>=0.10",
 ]
 
 [project.optional-dependencies]
@@ -45,6 +49,10 @@ extend-exclude = ["alembic"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+# conftest must set EMBEDDING_PROVIDER before app settings are imported.
+"tests/conftest.py" = ["E402"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

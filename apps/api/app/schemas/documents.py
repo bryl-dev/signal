@@ -26,3 +26,8 @@ class IngestResponse(BaseModel):
     fetched: int
     upserted: int
     errors: list[dict]
+    embedded: int = 0
+    stories_created: int = 0
+    joined_content_hash: int = 0
+    joined_embedding: int = 0
+    clustering_error: str | None = None
