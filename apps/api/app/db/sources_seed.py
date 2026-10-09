@@ -85,6 +85,21 @@ SOURCES: list[dict] = [
             "max_items": 15,
         },
     },
+    {
+        # Feed behind store.steampowered.com/news: developer announcements plus press
+        # coverage that outlets syndicate to Steam.
+        "slug": "steam-news",
+        "name": "Steam News",
+        "source_type": "rss",
+        "homepage_url": "https://store.steampowered.com/news/",
+        "quality_tier": "aggregator",
+        "default_content_type": "news",
+        "fetch_config": {
+            "feed_url": "https://store.steampowered.com/feeds/news/?l=english",
+            "allowed_hosts": ["store.steampowered.com"],
+            "max_items": 15,
+        },
+    },
 ]
 
 
