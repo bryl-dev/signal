@@ -1,4 +1,5 @@
 import hashlib
+import html
 import re
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
@@ -38,5 +39,5 @@ def sha256_text(value: str) -> str:
 
 
 def strip_html(value: str) -> str:
-    text = re.sub(r"<[^>]+>", " ", value)
+    text = html.unescape(re.sub(r"<[^>]+>", " ", value))
     return re.sub(r"\s+", " ", text).strip()

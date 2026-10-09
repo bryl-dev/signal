@@ -2,15 +2,35 @@
 
 A personal information intelligence platform: ingest what you already care about, cluster duplicates, rank against your interest profile, and brief you with cited summaries.
 
-This repository is a **modular monolith** (FastAPI + Next.js + PostgreSQL + Redis). Week 2 adds multi-source ingest into a shared document schema.
+This repository is a **modular monolith** (FastAPI + Next.js + PostgreSQL/pgvector + Redis). Week 3 groups same-event coverage from different sources into stories.
 
 ## What works now
 
 - Register / sign in with httpOnly JWT cookies
 - Pick at least 5 interests, including custom topics
 - Ingest RSS, YouTube channel RSS, and Hacker News into `documents`
-- Fetch latest from the home page (raw items, no ranking yet)
+- Embed every document locally (`BAAI/bge-small-en-v1.5` via fastembed, stored in pgvector) and group near-duplicates into stories
+- Fetch latest from the home page; the feed shows stories with "also covered by" (no ranking yet)
 - Health checks, Alembic migrations, topic/source seed, GitHub Actions CI
+
+## How story grouping works
+
+Grouping is conservative on purpose: a leftover duplicate is a small annoyance, but merging two different events hides news. A document joins an existing story only if, within a 72-hour window, either
+
+1. its body is identical to a member's (bodies under 200 characters don't count), or
+2. its embedding's cosine similarity to the story's **first** document is at least `CLUSTER_SIMILARITY_THRESHOLD`.
+
+Comparing against the first document instead of any member stops stories from drifting through a chain of slightly-similar items. Each membership records how it matched (`content_hash` or `embedding` plus the score), so the UI can say why two items were grouped.
+
+The threshold is picked from a labeled set of headline pairs in `evals/dedup/pairs.jsonl`, including hard negatives such as "same game, different patch":
+
+```bash
+cd apps/api
+python -m app.clustering.eval ../../evals/dedup/pairs.jsonl   # precision/recall per threshold
+python -m app.clustering.rebuild                              # regroup after changing rules
+```
+
+With the current 28 pairs, every threshold from 0.84 to 0.88 has zero false merges; the default is 0.86.
 
 ## Quick start (local)
 
@@ -61,14 +81,16 @@ cd apps/api && pytest && ruff check .
 cd apps/web && npm run lint
 ```
 
-API tests use an in-memory SQLite database and do not require Docker.
+API tests use an in-memory SQLite database and a deterministic hashing embedder, so they need neither Docker nor a model download.
+
+The first ingest downloads the embedding model (~130 MB) into the local cache. Python verifies TLS against the OS certificate store (`truststore`), so this also works behind HTTPS-inspecting corporate proxies.
 
 ## Repository layout
 
 ```
 apps/api     FastAPI, Alembic, ingest adapters, ARQ worker
 apps/web     Next.js App Router
-evals/       Golden sets (later)
+evals/       Labeled sets for tuning (dedup pairs today)
 fixtures/    Recorded RSS feeds for ingest tests
 ```
 

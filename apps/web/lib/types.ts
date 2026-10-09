@@ -32,6 +32,39 @@ export type DocumentItem = {
   excerpt: string;
 };
 
+export type StoryMember = {
+  document_id: string;
+  title: string;
+  url: string;
+  source_name: string;
+  published_at: string | null;
+  method: "seed" | "content_hash" | "embedding";
+  similarity: number | null;
+};
+
+export type StoryItem = {
+  id: string;
+  title: string;
+  url: string;
+  excerpt: string;
+  first_seen_at: string;
+  last_seen_at: string;
+  source_count: number;
+  members: StoryMember[];
+};
+
+export type IngestResult = {
+  sources: number;
+  fetched: number;
+  upserted: number;
+  errors: Array<{ source: string; error: string }>;
+  embedded: number;
+  stories_created: number;
+  joined_content_hash: number;
+  joined_embedding: number;
+  clustering_error: string | null;
+};
+
 export type InterestItem = {
   topic_id: string;
   slug: string;

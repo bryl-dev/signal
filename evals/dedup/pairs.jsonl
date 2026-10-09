@@ -1,0 +1,28 @@
+{"a": "OpenAI launches GPT-5.5 with improved reasoning", "b": "OpenAI's new GPT-5.5 model focuses on better reasoning", "same": true}
+{"a": "Anthropic releases Claude Opus 5 for coding agents", "b": "Claude Opus 5 is here, and Anthropic says it's its best coding model yet", "same": true}
+{"a": "Nintendo announces Switch 2 Direct for next week", "b": "A Nintendo Direct focused on Switch 2 is coming next week", "same": true}
+{"a": "Monster Hunter Wilds Title Update 4 adds new monster and arena quests", "b": "Monster Hunter Wilds' fourth title update brings a new monster and arena quests", "same": true}
+{"a": "One Piece anime returns from hiatus in April with Elbaph arc", "b": "One Piece anime's Elbaph arc premieres in April after break", "same": true}
+{"a": "Jujutsu Kaisen season 3 premiere date revealed", "b": "Jujutsu Kaisen Season 3 gets premiere date and new trailer", "same": true}
+{"a": "Granblue Fantasy Relink sells over 2 million copies", "b": "Granblue Fantasy: Relink passes 2 million units sold", "same": true}
+{"a": "Riot reveals League of Legends 2026 season changes", "b": "League of Legends 2026 season: Riot details major gameplay changes", "same": true}
+{"a": "Google DeepMind unveils Gemini 3 with native video understanding", "b": "Gemini 3 announced by Google DeepMind, adds native video understanding", "same": true}
+{"a": "Pokémon Legends: Z-A launches October 16", "b": "Pokémon Legends Z-A release date set for October 16", "same": true}
+{"a": "GitHub Copilot adds autonomous coding agent to pull requests", "b": "GitHub's Copilot coding agent can now open pull requests on its own", "same": true}
+{"a": "Elden Ring Nightreign DLC The Forsaken Hollows announced", "b": "FromSoftware announces Nightreign expansion The Forsaken Hollows", "same": true}
+{"a": "Meta releases Llama 5 open-weight models", "b": "Llama 5: Meta ships new open-weight model family", "same": true}
+{"a": "Grand Blue Dreaming season 2 confirmed for summer", "b": "Grand Blue season 2 anime confirmed, airs this summer", "same": true}
+{"a": "Monster Hunter Wilds Title Update 4 adds new monster", "b": "Monster Hunter Wilds PC performance patch improves frame rates", "same": false}
+{"a": "OpenAI launches GPT-5.5 with improved reasoning", "b": "OpenAI raises $40 billion in new funding round", "same": false}
+{"a": "Nintendo announces Switch 2 Direct for next week", "b": "Nintendo Switch 2 sales top 10 million units", "same": false}
+{"a": "Jujutsu Kaisen season 3 premiere date revealed", "b": "Jujutsu Kaisen creator Gege Akutami announces new manga", "same": false}
+{"a": "Anthropic releases Claude Opus 5 for coding agents", "b": "Anthropic publishes new interpretability research on Claude", "same": false}
+{"a": "League of Legends patch 26.4 notes: Ahri buffs", "b": "League of Legends patch 26.5 notes: Jinx nerfs", "same": false}
+{"a": "Pokémon Legends: Z-A launches October 16", "b": "Pokémon TCG Pocket adds new expansion", "same": false}
+{"a": "Granblue Fantasy Relink sells over 2 million copies", "b": "Granblue Fantasy Versus: Rising adds new character", "same": false}
+{"a": "Elden Ring Nightreign DLC The Forsaken Hollows announced", "b": "Elden Ring movie adaptation in development at A24", "same": false}
+{"a": "Show HN: I built a RAG pipeline in 200 lines of Python", "b": "Ask HN: Is RAG still worth it with long-context models?", "same": false}
+{"a": "One Piece chapter 1150 delayed", "b": "One Piece live-action season 2 trailer released", "same": false}
+{"a": "Google DeepMind unveils Gemini 3 with native video understanding", "b": "Google DeepMind's AlphaFold 4 predicts protein interactions", "same": false}
+{"a": "Meta releases Llama 5 open-weight models", "b": "Mistral releases Mistral Large 3 open-weight model", "same": false}
+{"a": "GitHub Copilot adds autonomous coding agent to pull requests", "b": "Cursor adds background agents that run in the cloud", "same": false}

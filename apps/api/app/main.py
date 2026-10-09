@@ -5,15 +5,17 @@ import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
+from app import models  # noqa: F401
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.logging import configure_logging
+from app.core.tls import use_system_trust_store
 from app.db.base import Base
 from app.db.seed import seed_topics
 from app.db.session import SessionLocal, engine
 from app.db.sources_seed import seed_sources
-from app.models import Document, IngestionRun, Source, Topic, User, UserInterest  # noqa: F401
 
+use_system_trust_store()
 configure_logging()
 logger = structlog.get_logger()
 

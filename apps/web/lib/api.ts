@@ -1,4 +1,12 @@
-import type { DocumentItem, InterestItem, Topic, TopicCategory, User } from "./types";
+import type {
+  DocumentItem,
+  IngestResult,
+  InterestItem,
+  StoryItem,
+  Topic,
+  TopicCategory,
+  User,
+} from "./types";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -88,9 +96,6 @@ export const api = {
       body: JSON.stringify({ topic_ids: topicIds }),
     }),
   documents: () => request<{ items: DocumentItem[] }>("/v1/documents"),
-  ingest: () =>
-    request<{ sources: number; fetched: number; upserted: number; errors: Array<{ source: string; error: string }> }>(
-      "/v1/ingest",
-      { method: "POST" },
-    ),
+  stories: () => request<{ items: StoryItem[] }>("/v1/stories"),
+  ingest: () => request<IngestResult>("/v1/ingest", { method: "POST" }),
 };
