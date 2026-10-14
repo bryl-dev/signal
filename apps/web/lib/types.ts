@@ -66,6 +66,33 @@ export type FeedItem = {
   reasons: RankReason[];
 };
 
+export type BriefSource = {
+  document_id: string;
+  title: string;
+  url: string;
+  source_name: string;
+  published_at: string | null;
+};
+
+export type BriefItem = {
+  story_id: string | null;
+  position: number;
+  score: number;
+  reasons: RankReason[];
+  headline: string;
+  bullets: Array<{ text: string; citations: number[] }>;
+  method: "llm" | "extractive";
+  sources: BriefSource[];
+};
+
+export type Brief = {
+  id: string;
+  created_at: string;
+  model: string;
+  llm_error: string | null;
+  items: BriefItem[];
+};
+
 export type IngestResult = {
   sources: number;
   fetched: number;

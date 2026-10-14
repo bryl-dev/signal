@@ -1,3 +1,4 @@
+from app.models.briefing import Brief, BriefItem, StorySummary
 from app.models.document import Document
 from app.models.embedding import DocumentEmbedding
 from app.models.ingestion import IngestionRun
@@ -17,4 +18,7 @@ __all__ = [
     "IngestionRun",
     "Story",
     "StoryMember",
+    "StorySummary",
+    "Brief",
+    "BriefItem",
 ]

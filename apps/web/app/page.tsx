@@ -178,6 +178,9 @@ export default function HomePage() {
         <Brand compact />
         <div className="flex items-center gap-4 text-sm text-paper-400">
           <span>{user.email}</span>
+          <Link href="/brief" className="hover:text-paper-50">
+            Brief
+          </Link>
           <Link href="/onboarding" className="hover:text-paper-50">
             Interests
           </Link>
