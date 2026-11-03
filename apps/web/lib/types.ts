@@ -11,6 +11,7 @@ export type Topic = {
   name: string;
   category: string;
   description: string | null;
+  aliases: string[];
 };
 
 export type TopicCategory = {
@@ -54,7 +55,7 @@ export type StoryItem = {
 };
 
 export type RankReason = {
-  kind: "topic" | "recency" | "coverage";
+  kind: "topic" | "recency" | "coverage" | "feedback";
   label: string;
   contribution: number;
 };
@@ -64,6 +65,7 @@ export type FeedItem = {
   score: number;
   matched_topics: Array<{ topic_id: string; name: string; kind: string; similarity: number }>;
   reasons: RankReason[];
+  feedback: -1 | 0 | 1;
 };
 
 export type BriefSource = {
@@ -111,6 +113,10 @@ export type InterestItem = {
   name: string;
   category: string;
   weight: number;
+  effective_weight: number;
+  votes: number;
   is_muted: boolean;
   source: string;
+  aliases: string[];
+  topic_aliases: string[];
 };

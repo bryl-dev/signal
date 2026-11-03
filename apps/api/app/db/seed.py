@@ -40,6 +40,36 @@ TOPICS: list[tuple[str, str, str, str]] = [
 ]
 
 
+# Names that unambiguously refer to the topic. Phrases of 3 characters or fewer match case-
+# sensitively, so "GPT" won't fire on "gpt" in a URL slug. Avoid words with everyday meanings
+# ("Unity", "Cursor", "Worlds"): a false match costs more trust than a missed one.
+ALIASES: dict[str, list[str]] = {
+    "ai-agents": ["AI agent", "agentic", "coding agent", "autonomous agents"],
+    "llms": [
+        "LLM",
+        "large language model",
+        "language model",
+        "GPT",
+        "Llama",
+        "Mistral",
+        "Qwen",
+        "DeepSeek",
+        "Gemini",
+    ],
+    "openai": ["ChatGPT", "GPT-5", "Sora", "Sam Altman"],
+    "anthropic": ["Claude", "Dario Amodei"],
+    "ai-coding": ["Copilot", "Claude Code", "vibe coding", "coding agent", "coding assistant"],
+    "rag": ["retrieval-augmented", "retrieval augmented generation", "vector database"],
+    "ai-research": ["arXiv", "NeurIPS", "ICML", "ICLR", "DeepMind"],
+    "elden-ring": ["Nightreign", "FromSoftware", "Shadow of the Erdtree"],
+    "pokemon": ["Pokemon", "Pikachu", "Game Freak"],
+    "nintendo": ["Switch 2", "Nintendo Switch", "Zelda", "Super Mario"],
+    "game-development": ["Unreal Engine", "Godot", "gamedev", "game dev", "Unity engine"],
+    "one-piece": ["Luffy", "Eiichiro Oda"],
+    "jujutsu-kaisen": ["JJK", "Gege Akutami", "Sukuna"],
+}
+
+
 def topic_id(slug: str) -> UUID:
     return uuid5(_NS, slug)
 
@@ -47,8 +77,13 @@ def topic_id(slug: str) -> UUID:
 async def seed_topics(session: AsyncSession) -> int:
     created = 0
     for slug, name, category, description in TOPICS:
-        existing = await session.execute(select(Topic).where(Topic.slug == slug))
-        if existing.scalar_one_or_none() is not None:
+        aliases = ALIASES.get(slug, [])
+        existing = (
+            await session.execute(select(Topic).where(Topic.slug == slug))
+        ).scalar_one_or_none()
+        if existing is not None:
+            if existing.aliases != aliases:
+                existing.aliases = aliases
             continue
         session.add(
             Topic(
@@ -57,12 +92,12 @@ async def seed_topics(session: AsyncSession) -> int:
                 name=name,
                 category=category,
                 description=description,
+                aliases=aliases,
                 sort_order=created,
             )
         )
         created += 1
-    if created:
-        await session.commit()
+    await session.commit()
     return created
 
 

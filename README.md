@@ -2,7 +2,7 @@
 
 A personal information intelligence platform: ingest what you already care about, cluster duplicates, rank against your interest profile, and brief you with cited summaries.
 
-This repository is a **modular monolith** (FastAPI + Next.js + PostgreSQL/pgvector + Redis). Week 3 groups same-event coverage from different sources into stories; week 4 ranks those stories against your interests and says why; week 5 turns the top stories into a morning brief where every line cites its sources.
+This repository is a **modular monolith** (FastAPI + Next.js + PostgreSQL/pgvector + Redis). Week 3 groups same-event coverage from different sources into stories; week 4 ranks those stories against your interests and says why; week 5 turns the top stories into a morning brief where every line cites its sources; week 6 adds topic aliases and learns from thumbs up/down.
 
 ## What works now
 
@@ -11,6 +11,7 @@ This repository is a **modular monolith** (FastAPI + Next.js + PostgreSQL/pgvect
 - Ingest RSS, YouTube channel RSS, and Hacker News into `documents`
 - Embed every document locally (`BAAI/bge-small-en-v1.5` via fastembed, stored in pgvector) and group near-duplicates into stories
 - A ranked "For you" feed: stories from the last 7 days that match your interests, each with the reasons it ranked where it did
+- Topic aliases and story feedback: hide stories, get more like them, and see how your votes moved each topic
 - A morning brief: your top 8 stories summarized by a local model (Ollama), every bullet citing the articles it came from
 - Sources: Hacker News, Anime News Network, Polygon, Steam News, and a few subreddits
 - Health checks, Alembic migrations, topic/source seed, GitHub Actions CI
@@ -47,7 +48,28 @@ Matched stories are ordered by a linear score in which every feature is between 
 | Coverage | 0.12 | 0 for one source, 0.5 for two, 1 for four or more |
 | Source quality | 0.08 | by source tier (major news > aggregator > forum) |
 
-The relevance threshold comes from `evals/relevance/pairs.jsonl` (`python -m app.ranking.eval`). On 40 labeled pairs, name mentions alone get precision 1.00 / recall 0.37; adding semantic matches at 0.64 gets 0.93 / 0.68. The remaining misses need world knowledge a small embedding model lacks (that "Claude" is Anthropic, or "Faker" is League of Legends), which is the next thing to fix — through topic aliases or feedback — rather than lowering the threshold.
+The relevance threshold comes from `evals/relevance/pairs.jsonl` (`python -m app.ranking.eval`). On 40 labeled pairs:
+
+| Matching | Precision | Recall |
+| --- | --- | --- |
+| Topic name mentions | 1.00 | 0.37 |
+| Name + semantic ≥ 0.64 | 0.93 | 0.68 |
+| Name + aliases | 1.00 | 0.79 |
+| Name + aliases + semantic ≥ 0.64 (current) | 0.94 | 0.84 |
+
+The misses without aliases needed world knowledge a small embedding model lacks (that "Claude" is Anthropic, or "Faker" is League of Legends). Aliases supply it. The remaining misses ("Arch-Tempered Rey Dau arrives…" for Monster Hunter Wilds) would need an alias per monster, which is the user's call. The curated aliases were written with this eval in view, so treat that gain as optimistic until more pairs are labeled.
+
+## Aliases and feedback
+
+**Aliases** are other names that count as a mention: curated ones on built-in topics (in `app/db/seed.py`) plus your own per interest (click a topic under "Watching"). Phrases of three characters or fewer match exact case, so "LoL" or "GPT" don't fire on "lol" or a URL slug. A match says which name it used: "Mentions Claude (Anthropic)".
+
+**Feedback** is a thumbs up or down on a story, stored against its lead article so regrouping stories doesn't lose it. It has three effects, each shown as a reason on the story:
+
+- **Hide.** A thumbs-down removes the story from the feed and the brief, and halves the relevance of stories very close to it ("Similar to “…”, which you hid"). Undo restores both.
+- **Topic weight.** Each vote nudges the weight of the topics the story matched by ±0.05 (from 0.7, clamped to 0.2–1.0). It's recomputed from your votes on every request rather than stored, so undoing a vote undoes its effect exactly.
+- **Follow-ups.** A story whose embedding is at least `FEEDBACK_SIMILARITY_THRESHOLD` (0.80) similar to one you liked in the last 30 days joins the feed even with no topic match ("Like “…”, which you liked").
+
+The eval also simulates one thumbs-up per topic. Headline similarity to a liked story turns out to be a poor way to find *new* stories on a topic: at 0.55 it recovers 2 missed headlines while pulling in 41 unwanted ones, and above 0.65 it recovers nothing. So the 0.80 threshold is deliberately limited to follow-up coverage of the same story. "More of this topic" comes from the weight adjustment instead.
 
 ## How the brief is written
 

@@ -1,6 +1,7 @@
 from app.models.briefing import Brief, BriefItem, StorySummary
 from app.models.document import Document
 from app.models.embedding import DocumentEmbedding
+from app.models.feedback import StoryFeedback
 from app.models.ingestion import IngestionRun
 from app.models.interest import UserInterest
 from app.models.source import Source
@@ -21,4 +22,5 @@ __all__ = [
     "StorySummary",
     "Brief",
     "BriefItem",
+    "StoryFeedback",
 ]
