@@ -1,4 +1,5 @@
 import type {
+  Brief,
   DocumentItem,
   FeedItem,
   IngestResult,
@@ -100,4 +101,6 @@ export const api = {
   stories: () => request<{ items: StoryItem[] }>("/v1/stories"),
   feed: () => request<{ items: FeedItem[]; other_items: FeedItem[] }>("/v1/feed"),
   ingest: () => request<IngestResult>("/v1/ingest", { method: "POST" }),
+  brief: () => request<{ brief: Brief | null }>("/v1/brief"),
+  generateBrief: () => request<Brief>("/v1/brief", { method: "POST" }),
 };

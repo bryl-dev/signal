@@ -53,6 +53,14 @@ class Settings(BaseSettings):
     rank_weight_coverage: float = 0.12
     rank_weight_quality: float = 0.08
 
+    # Morning brief. Summaries run on a local model through Ollama.
+    ollama_base_url: str = "http://localhost:11434"
+    llm_model: str = "qwen2.5:7b"
+    llm_timeout_seconds: float = 300.0
+    brief_size: int = 8
+    summary_max_sources: int = 4
+    summary_source_chars: int = 1500
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

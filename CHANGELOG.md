@@ -17,6 +17,9 @@ All notable changes to Signal are documented here.
 - Steam News as a gaming source.
 - `GET /v1/feed`: explainable linear ranking of recent stories against the user's interests
   (name mentions plus semantic similarity), with a labeled relevance eval set.
+- Cited morning brief (`POST /v1/brief`, `GET /v1/brief`, `/brief` page): top stories summarized
+  by a local model through Ollama, with citation and number checks, an extractive fallback,
+  per-story summary caching, saved brief snapshots, and a summarization eval.
 
 ### Fixed
 
