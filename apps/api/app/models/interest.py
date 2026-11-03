@@ -2,8 +2,9 @@ import uuid
 from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, String, UniqueConstraint
+from sqlalchemy.dialects.sqlite import JSON as SQLiteJSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.types import Uuid
+from sqlalchemy.types import JSON, Uuid
 
 from app.db.base import Base
 from app.models.topic import Topic
@@ -24,6 +25,10 @@ class UserInterest(Base):
     weight: Mapped[float] = mapped_column(Float, default=0.7)
     is_muted: Mapped[bool] = mapped_column(Boolean, default=False)
     source: Mapped[str] = mapped_column(String(16), default="explicit")
+    # The user's own extra names for this topic, on top of the topic's curated aliases.
+    aliases: Mapped[list] = mapped_column(
+        JSON().with_variant(SQLiteJSON, "sqlite"), default=list, server_default="[]"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(UTC),

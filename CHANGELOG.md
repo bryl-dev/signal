@@ -20,6 +20,14 @@ All notable changes to Signal are documented here.
 - Cited morning brief (`POST /v1/brief`, `GET /v1/brief`, `/brief` page): top stories summarized
   by a local model through Ollama, with citation and number checks, an extractive fallback,
   per-story summary caching, saved brief snapshots, and a summarization eval.
+- Topic aliases (curated, plus per-user via `PATCH /v1/me/interests/{topic_id}`); short aliases
+  match case-sensitively. Relevance recall on the eval set rises from 0.68 to 0.84.
+- Story feedback (`PUT /v1/feedback`): thumbs-down hides a story and demotes near-duplicates,
+  votes adjust topic weights, and close follow-ups to liked stories join the feed.
+
+### Changed
+
+- Re-saving interests keeps existing interests' weights and aliases instead of recreating them.
 
 ### Fixed
 

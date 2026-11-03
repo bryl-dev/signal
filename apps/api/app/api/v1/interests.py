@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import delete, select
@@ -12,6 +13,7 @@ from app.db.session import get_db
 from app.models.interest import UserInterest
 from app.models.topic import Topic
 from app.models.user import User
+from app.ranking.service import effective_weight, topic_votes
 from app.schemas.interest import (
     CreateTopicRequest,
     InterestItem,
@@ -19,6 +21,7 @@ from app.schemas.interest import (
     TopicCatalogResponse,
     TopicCategoryResponse,
     TopicResponse,
+    UpdateInterestRequest,
     UpdateInterestsRequest,
 )
 
@@ -63,6 +66,7 @@ def _topic_response(topic: Topic) -> TopicResponse:
         name=topic.name,
         category=topic.category,
         description=topic.description,
+        aliases=topic.aliases,
     )
 
 
@@ -109,19 +113,47 @@ async def get_interests(
         .where(UserInterest.user_id == user.id)
     )
     rows = result.scalars().all()
-    items = [
-        InterestItem(
-            topic_id=row.topic_id,
-            slug=row.topic.slug,
-            name=row.topic.name,
-            category=row.topic.category,
-            weight=row.weight,
-            is_muted=row.is_muted,
-            source=row.source,
-        )
-        for row in rows
-    ]
+    votes = await topic_votes(db, user.id)
+    items = [_interest_item(row, votes.get(row.topic_id, 0)) for row in rows]
     return InterestsResponse(items=items, onboarded=_is_onboarded(len(items)))
+
+
+def _interest_item(row: UserInterest, votes: int) -> InterestItem:
+    return InterestItem(
+        topic_id=row.topic_id,
+        slug=row.topic.slug,
+        name=row.topic.name,
+        category=row.topic.category,
+        weight=row.weight,
+        effective_weight=round(effective_weight(row.weight, votes), 3),
+        votes=votes,
+        is_muted=row.is_muted,
+        source=row.source,
+        aliases=row.aliases,
+        topic_aliases=row.topic.aliases,
+    )
+
+
+@router.patch("/me/interests/{topic_id}", response_model=InterestItem)
+async def update_interest(
+    topic_id: UUID,
+    payload: UpdateInterestRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> InterestItem:
+    row = (
+        await db.execute(
+            select(UserInterest)
+            .options(selectinload(UserInterest.topic))
+            .where(UserInterest.user_id == user.id, UserInterest.topic_id == topic_id)
+        )
+    ).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not an interest")
+    row.aliases = payload.aliases
+    await db.commit()
+    votes = await topic_votes(db, user.id)
+    return _interest_item(row, votes.get(topic_id, 0))
 
 
 @router.put("/me/interests", response_model=InterestsResponse)
@@ -142,9 +174,25 @@ async def replace_interests(
     if len(topics) != len(unique_ids):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unknown topic id")
 
-    await db.execute(delete(UserInterest).where(UserInterest.user_id == user.id))
+    # Keep rows for topics that stay selected, so their weight and aliases survive a re-save.
+    await db.execute(
+        delete(UserInterest).where(
+            UserInterest.user_id == user.id, UserInterest.topic_id.not_in(unique_ids)
+        )
+    )
+    kept = set(
+        (
+            await db.execute(
+                select(UserInterest.topic_id).where(UserInterest.user_id == user.id)
+            )
+        )
+        .scalars()
+        .all()
+    )
     now = datetime.now(UTC)
     for topic in topics:
+        if topic.id in kept:
+            continue
         db.add(
             UserInterest(
                 user_id=user.id,

@@ -3,8 +3,9 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.dialects.sqlite import JSON as SQLiteJSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.types import Uuid
+from sqlalchemy.types import JSON, Uuid
 
 from app.db.base import Base
 
@@ -20,6 +21,10 @@ class Topic(Base):
     name: Mapped[str] = mapped_column(String(120))
     category: Mapped[str] = mapped_column(String(32), index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Other names that count as a mention, e.g. "Claude" for Anthropic. Curated in the seed.
+    aliases: Mapped[list] = mapped_column(
+        JSON().with_variant(SQLiteJSON, "sqlite"), default=list, server_default="[]"
+    )
     parent_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("topics.id"), nullable=True
     )

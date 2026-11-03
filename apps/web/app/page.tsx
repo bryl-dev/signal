@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Brand } from "@/components/Brand";
+import { WatchingList } from "@/components/WatchingList";
 import { ApiError, api } from "@/lib/api";
 import type { FeedItem, IngestResult, InterestItem, StoryMember, User } from "@/lib/types";
 
@@ -27,11 +28,22 @@ function ingestSummary(result: IngestResult): string {
   return parts.join(" ");
 }
 
-function StoryCard({ item }: { item: FeedItem }) {
+type Vote = -1 | 0 | 1;
+
+function StoryCard({
+  item,
+  onVote,
+}: {
+  item: FeedItem;
+  onVote: (item: FeedItem, value: Vote) => void;
+}) {
   const { story } = item;
   const others = story.members.filter((member) => member.method !== "seed");
   const sources = Array.from(new Set(story.members.map((member) => member.source_name)));
-  const topicReasons = item.reasons.filter((reason) => reason.kind === "topic");
+  const topicReasons = item.reasons.filter(
+    (reason) => reason.kind === "topic" || reason.kind === "feedback",
+  );
+  const liked = item.feedback === 1;
   const recency = item.reasons.find((reason) => reason.kind === "recency");
 
   return (
@@ -59,13 +71,38 @@ function StoryCard({ item }: { item: FeedItem }) {
           {topicReasons.map((reason) => (
             <li
               key={reason.label}
-              className="rounded-full border border-signal-400/40 px-2 py-0.5 text-xs text-signal-400"
+              className={`rounded-full border px-2 py-0.5 text-xs ${
+                reason.kind === "feedback"
+                  ? "border-ink-700 text-paper-400"
+                  : "border-signal-400/40 text-signal-400"
+              }`}
             >
               {reason.label}
             </li>
           ))}
         </ul>
       ) : null}
+      <div className="mt-3 flex gap-2 text-xs">
+        <button
+          type="button"
+          onClick={() => onVote(item, liked ? 0 : 1)}
+          aria-pressed={liked}
+          className={`rounded-full border px-2.5 py-1 ${
+            liked
+              ? "border-signal-400 bg-signal-400/15 text-paper-50"
+              : "border-ink-700 text-paper-400 hover:text-paper-50"
+          }`}
+        >
+          {liked ? "Liked" : "More like this"}
+        </button>
+        <button
+          type="button"
+          onClick={() => onVote(item, -1)}
+          className="rounded-full border border-ink-700 px-2.5 py-1 text-paper-400 hover:text-paper-50"
+        >
+          Hide, less like this
+        </button>
+      </div>
       {others.length ? (
         <details className="mt-3 text-sm">
           <summary className="cursor-pointer text-paper-400 hover:text-paper-50">
@@ -102,11 +139,30 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [ingestMessage, setIngestMessage] = useState<string | null>(null);
   const [ingesting, setIngesting] = useState(false);
+  const [hidden, setHidden] = useState<FeedItem | null>(null);
+  const [voteError, setVoteError] = useState<string | null>(null);
 
   async function loadFeed() {
-    const ranked = await api.feed();
+    const [ranked, saved] = await Promise.all([api.feed(), api.interests()]);
     setFeed(ranked.items);
     setOthers(ranked.other_items);
+    setInterests(saved.items);
+  }
+
+  async function vote(item: FeedItem, value: Vote) {
+    setVoteError(null);
+    try {
+      await api.feedback(item.story.id, value);
+      setHidden(value === -1 ? item : null);
+      await loadFeed();
+    } catch (err) {
+      setVoteError(err instanceof ApiError ? err.message : "Could not save that.");
+    }
+  }
+
+  async function undoHide() {
+    if (!hidden) return;
+    await vote(hidden, 0);
   }
 
   useEffect(() => {
@@ -208,6 +264,15 @@ export default function HomePage() {
           and how many sources covered them. Each one says why it is here.
         </p>
         {ingestMessage ? <p className="mt-3 text-sm text-signal-400">{ingestMessage}</p> : null}
+        {voteError ? <p className="mt-3 text-sm text-red-400">{voteError}</p> : null}
+        {hidden ? (
+          <p className="mt-3 text-sm text-paper-400">
+            Hid “{hidden.story.title}” and lowered similar stories.{" "}
+            <button type="button" onClick={undoHide} className="text-signal-400 hover:underline">
+              Undo
+            </button>
+          </p>
+        ) : null}
       </section>
 
       <section className="mt-10 space-y-4">
@@ -218,7 +283,7 @@ export default function HomePage() {
               : "No stories yet. Click Fetch latest."}
           </p>
         ) : (
-          feed.map((item) => <StoryCard key={item.story.id} item={item} />)
+          feed.map((item) => <StoryCard key={item.story.id} item={item} onVote={vote} />)
         )}
       </section>
 
@@ -229,25 +294,21 @@ export default function HomePage() {
           </summary>
           <div className="mt-4 space-y-4">
             {others.map((item) => (
-              <StoryCard key={item.story.id} item={item} />
+              <StoryCard key={item.story.id} item={item} onVote={vote} />
             ))}
           </div>
         </details>
       ) : null}
 
-      <section className="mt-12">
-        <h2 className="text-xs uppercase tracking-[0.2em] text-paper-400">Watching</h2>
-        <ul className="mt-4 flex flex-wrap gap-2">
-          {interests.map((item) => (
-            <li
-              key={item.topic_id}
-              className="rounded-full border border-ink-700 bg-ink-900 px-3 py-1.5 text-sm text-paper-100"
-            >
-              {item.name}
-            </li>
-          ))}
-        </ul>
-      </section>
+      <WatchingList
+        interests={interests}
+        onSaved={(updated) =>
+          setInterests((current) =>
+            current.map((item) => (item.topic_id === updated.topic_id ? updated : item)),
+          )
+        }
+        onChanged={loadFeed}
+      />
     </main>
   );
 }

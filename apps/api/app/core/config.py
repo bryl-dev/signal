@@ -52,6 +52,12 @@ class Settings(BaseSettings):
     rank_weight_recency: float = 0.25
     rank_weight_coverage: float = 0.12
     rank_weight_quality: float = 0.08
+    # Feedback. Tune the similarity threshold with `python -m app.ranking.eval`.
+    feedback_similarity_threshold: float = 0.8
+    feedback_window_days: int = 30
+    feedback_weight_step: float = 0.05
+    feedback_weight_min: float = 0.2
+    feedback_weight_max: float = 1.0
 
     # Morning brief. Summaries run on a local model through Ollama.
     ollama_base_url: str = "http://localhost:11434"

@@ -97,6 +97,16 @@ export const api = {
       method: "PUT",
       body: JSON.stringify({ topic_ids: topicIds }),
     }),
+  updateInterest: (topicId: string, aliases: string[]) =>
+    request<InterestItem>(`/v1/me/interests/${topicId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ aliases }),
+    }),
+  feedback: (storyId: string, value: -1 | 0 | 1) =>
+    request<{ story_id: string; value: number; topic_ids: string[] }>("/v1/feedback", {
+      method: "PUT",
+      body: JSON.stringify({ story_id: storyId, value }),
+    }),
   documents: () => request<{ items: DocumentItem[] }>("/v1/documents"),
   stories: () => request<{ items: StoryItem[] }>("/v1/stories"),
   feed: () => request<{ items: FeedItem[]; other_items: FeedItem[] }>("/v1/feed"),

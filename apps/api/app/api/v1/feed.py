@@ -46,6 +46,7 @@ async def get_feed(
                 RankReason(kind=r.kind, label=r.label, contribution=r.contribution)
                 for r in item.ranked.reasons
             ],
+            feedback=item.feedback,
         )
 
     return FeedResponse(
